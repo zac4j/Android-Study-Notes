@@ -1,7 +1,7 @@
 ---
-date:
+date: 2016-04-15 22:15
 status: public
-title: Activity生命周期
+title: Activity生命周期和启动模式
 ---
 
 ###典型情况生命周期分析
@@ -27,3 +27,14 @@ title: Activity生命周期
   + locale 设备的本地位置发生了变化，一般指切换了系统语言
   + orientation 屏幕方向发生变化，最常用。
   + keyboardHidden 键盘的可访问性发生变化，如用户调出了键盘
+  
+###Activity的LaunchMode启动模式
++ standard 标准模式，每次启动一个Activity都会重建一个实例，如Activity Ａ启动Activity　Ｂ（Ｂ是标准模式），那么Ｂ就会进入到Ａ所在的任务栈中；又如用ApplicationContext去启动standard模式的Activity时会有如下报错：
+```
+android.util.AndroidRuntimeException: Calling startActivity from outside of an Activity context requires the FLAG_ACTIVITY_NEW_TASK flag. Is this really what you want ?
+```
+这是因为非Activity类型的Context并没有任务栈，所以就会出现报错，解决方法是为待启动Activity指定**FLAG_ACTIVITY_NEW_TASK**标记，这样启动时就会为它创建一个新的任务栈，这个时候该Activity实际上是以singleTask模式启动的，你们感受下。
++ singTop 栈顶复用模式，这种模式下。
+ + 如果待启动的Activity已经在栈顶，那么此Activity不会被重新创建，同时它的`onNewIntent`方法**会被回调**，通过此方法的参数你们可以读取到当前请求的信息。**需要注意的是这个Activity的onCreate和onStart不会被回调**，因为它并没有发生改变。
+ + 如果待启动的Activity实例已存在但不在栈顶，那么新的Activity仍会被创建。
++ singleTask 栈内复用模式。这是一种单例模式，这种模式下，只要Activity在一个栈中存在，那么多次启动此Activity都不会重新创建实例，和singleTop一样，系统会回调其`onNewIntent`。
