@@ -37,4 +37,9 @@ android.util.AndroidRuntimeException: Calling startActivity from outside of an A
 + singTop 栈顶复用模式，这种模式下。
  + 如果待启动的Activity已经在栈顶，那么此Activity不会被重新创建，同时它的`onNewIntent`方法**会被回调**，通过此方法的参数你们可以读取到当前请求的信息。**需要注意的是这个Activity的onCreate和onStart不会被回调**，因为它并没有发生改变。
  + 如果待启动的Activity实例已存在但不在栈顶，那么新的Activity仍会被创建。
-+ singleTask 栈内复用模式。这是一种单例模式，这种模式下，只要Activity在一个栈中存在，那么多次启动此Activity都不会重新创建实例，和singleTop一样，系统会回调其`onNewIntent`。
++ singleTask 栈内复用模式。这是一种单例模式，这种模式下，只要Activity在一个栈中存在，那么多次启动此Activity都不会重新创建实例，和singleTop一样，系统会回调其`onNewIntent`。具体描述，当一个singleTask模式的Activity启动后，比如Activity A，系统会先寻找是否存在A**所需要要的任务栈**，如果不存在，则重新创建一个任务栈，然后再把A放到栈中。如果存在A所需的任务栈，这时要看A是否在栈中有实例存在，如果有实例存在，那么系统就会把A调到栈顶并调用它的`onNewInstance`方法，如果实例不存在，就创建A的实例并压入栈中。
++ singleInstance 单例模式。这是一种加强的singleTask模式，它除了具有singleTask的所有特性外，还有一个单独的特性，这种模式的Activity只能单独地位于一个任务栈中。具体描述，当Activity A启动后，系统会为它新建一个新的任务栈，然后A肚子在这个新的任务栈中，由于栈内复用的特性，后续的请求均不会创建新的Activity。
+
+####Activity所需要的任务栈TaskAffinity
+TaskAffinity属性主要和singleTask启动模式或者allowTaskReparenting属性配对使用，其他情况下没意义。另外任务栈分为*前台任务栈*和*后台任务栈*，后台任务栈中的Activity处于暂停状态，用户可以通过切换将后台任务栈再次调到前台。
+当TaskAffinity和singleTask启动模式配对使用的时候，它是具有该模式的Activity的目前任务栈的名字，待启动的Activity会运行在该名字和TaskAffinity相同的任务栈中。
