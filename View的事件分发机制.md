@@ -46,7 +46,7 @@ public boolean dispatchTouchEvent(MotionEvent event) {
 
 
 
-当一个View需要处理事件时，如设置了`OnTouchListener`,那么`OnTouchListener`中的onTouch方法会被回调。这时的事件处理就需要看onTouch的返回值，如果返回为false,则当前View的`onTouchEvent`方法会被调用；如果返回为true，则当前View的`onTouchEvent`方法不会被调用。另外如果当前View有设置onClickListener，那么它的onClick方法会在onTouchEvent之后被调用。由此对于View来说以上方法的优先级为：`OnTouchListener` --> `onTouchEvent` --> `OnClickListener`
+当一个View需要处理事件时，如设置了`OnTouchListener`,那么`OnTouchListener`中的onTouch方法会被回调。这时的事件处理就需要看onTouch的返回值，如果返回为false,则当前View的`onTouchEvent`方法会被调用；如果返回为true，则当前View的`onTouchEvent`方法不会被调用。另外如果当前View有设置onClickListener，那么它的onClick方法会在onTouchEvent之后被调用。由此对于View来说以上方法的优先级为：OnTouchListener --> onTouchEvent --> OnClickListener
 
 
 
