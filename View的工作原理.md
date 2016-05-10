@@ -1,0 +1,27 @@
+## View的工作原理
+### 了解ViewRoot和DecorView
+##### ViewRoot
+ViewRoot对于于ViewRootImpl类，它是WindowManager和DecorView的纽带，view的三大流程都是通过ViewRoot来完成的。在ActivityThread中，当Activity被创建完毕后，会将DecorView添加到Window中，同事创建ViewRootImpl对象，并将ViewRootImpl和DecorView建立联系，相应源码为:
+``` java
+root = new ViewRootImpl(view.getContext(), display);
+root.setView(view,wparams,panelParentView);
+```
+View的绘制流程是从ViewRoot的performTraversals方法开始的，它经过measure、layout和draw三个过程才能最终将一个View绘制出来。其中：
++ measure　用来测量View的宽高
++ layout 用来确定View在父容器放置的位置
++ draw 用来将View绘制在屏幕上
+
+performTraversals会依次调用performMeasure、performLayout和performDraw三个方法，这三个方法又会完成顶级View的measure、layout和draw流程，其中在performMeasure中会调用measure方法，measure会调用onMeasure方法，此方法会对所有的子元素进行measure过程，这个时候measure流程就从父容器传递到子元素中，这样就完成了一次measure过程。接着子元素会重复measure过程，直到完成整个View树的遍历。同理performLayout和performDraw的传递流程与performMeasure相似。
+
+##### DecorView
+DecorView作为顶级View，一般其内部会包含vertical的LinearLayout。这个LinearLayout分为title栏和content栏两部分，一般Activity中的setContentView就是将布局添加到id为content的FrameLayout中，获取content:ViewGroup content = (ViewGroup)findViewById(android.R.id.content);获取子view:content.getChildAt(0);通过源码可以知道DecorView是一个FrameLayout.
+
+### 理解MeasureSpec
+MeasureSpec决定了一个View的尺寸规格，在测量过程中，系统会将View的LayoutParams根据父容器提供的规格转换成对应的MeasureSpec，然后在根据MeasureSpec来测量出View的宽高。
+MeasureSpec代表一个32位的int值，高２位代表SpecMode，低３０位代表SpecSize，SpecMode指测量模式，SpecSize是指在某种模式下的规格大小。SpecMode有三类：
++ UNSPECIFIED 父容器不对View有任何限制，这种一般用于系统内部
++ EXACTLY　父容器已经检测出View所需要的精确大小，这个时候View的最终大小就是SpecSize所制定的值，它对应于LayoutParams中的match_parent和具体数值这两种模式。
++ AT_MOST 父容器指定SpecSize，View的大小不能大于这个数值，具体是什么要看不同View的具体实现，它对应于LayoutParams中的wrap_content。
+
+##### MeasureSpec和LayoutParams的关系
+一般我们可以给View设置LayoutParams。这样在View测量的时候，系统会将LayoutParams在父容器约束转换成对应的MeasureSpec，然后再根据这个MeasureSpec来决定View测量后的宽高。对于DecorView,其MeasureSpec由窗口的尺寸和其自身的LayoutParams共同决定;而对于普通View,其MeasureSpec由父容器的MeasureSpec和自身的LayoutParams共同决定。
